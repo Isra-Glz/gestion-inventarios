@@ -17,3 +17,4 @@ app.include_router(users_routes.router, prefix="/usuarios", tags=["Usuarios"])
 def root():
     return {"message": "API funcionando correctamente"}
 
+

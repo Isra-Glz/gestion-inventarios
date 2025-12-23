@@ -1,20 +1,30 @@
 from fastapi import FastAPI
-from app.routes import inventory_routes  # lo crearemos después
-from app.routes import users_routes      # lo crearemos después
+from fastapi.middleware.cors import CORSMiddleware
+from app.routes import inventory_routes
 
 app = FastAPI(
     title="API de Gestión de Inventario",
     description="Backend con Python, FastAPI y SQL Server",
-    version="1.0.0"
+    version="1.0.0",
 )
 
-# Registrar rutas
-app.include_router(inventory_routes.router, prefix="/inventario", tags=["Inventario"])
-app.include_router(users_routes.router, prefix="/usuarios", tags=["Usuarios"])
+# CORS (permitir React en desarrollo)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # SOLO para desarrollo
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-# Ruta de prueba
+# Rutas
+app.include_router(
+    inventory_routes.router,
+    prefix="/inventario",
+    tags=["Inventario"],
+)
+
+# Ruta raíz de prueba
 @app.get("/")
 def root():
     return {"message": "API funcionando correctamente"}
-
-

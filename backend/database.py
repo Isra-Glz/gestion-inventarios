@@ -1,22 +1,20 @@
+import os
 import pyodbc
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DB_SERVER = os.getenv("DB_SERVER")
+DB_DATABASE = os.getenv("DB_DATABASE")
+
+connection_string = (
+    "DRIVER={ODBC Driver 17 for SQL Server};"
+    f"SERVER={DB_SERVER};"
+    f"DATABASE={DB_DATABASE};"
+    "Trusted_Connection=yes;"
+    "Encrypt=no;"
+    "TrustServerCertificate=yes;"
+)
 
 def get_connection():
-    """
-    Retorna una conexión a SQL Server usando pyodbc.
-    Las credenciales se configurarán más adelante.
-    """
-    server = "TU_SERVIDOR"
-    database = "InventarioDB"
-    username = "TU_USUARIO"
-    password = "TU_PASSWORD"
-
-    connection_string = (
-        f"DRIVER={{SQL Server}};"
-        f"SERVER={server};"
-        f"DATABASE={database};"
-        f"UID={username};"
-        f"PWD={password}"
-    )
-
     return pyodbc.connect(connection_string)
-

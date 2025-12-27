@@ -1,6 +1,14 @@
 const API_URL = "http://127.0.0.1:8000";
 
-export async function crearProducto(producto) {
+interface ProductoCreate {
+  nombre: string;
+  descripcion: string;
+  id_categoria: number;
+  stock: number;
+  precio: number;
+}
+
+export async function crearProducto(producto: ProductoCreate) {
   const response = await fetch(`${API_URL}/productos`, {
     method: "POST",
     headers: {

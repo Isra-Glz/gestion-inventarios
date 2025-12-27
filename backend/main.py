@@ -1,7 +1,127 @@
 from fastapi import FastAPI
 from database import get_connection
+from pydantic import BaseModel
+from fastapi import HTTPException
+
 
 app = FastAPI()
+
+#------------------------------------
+# POST: Productos
+#------------------------------------
+
+class ProductoCreate(BaseModel):
+    nombre: str
+    descripcion: str
+    id_categoria: int
+    stock: int
+    precio: float
+
+
+@app.post("/productos")
+def create_producto(producto: ProductoCreate):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            INSERT INTO Productos (nombre, descripcion, id_categoria, stock, precio)
+            VALUES (?, ?, ?, ?, ?)
+        """,
+        producto.nombre,
+        producto.descripcion,
+        producto.id_categoria,
+        producto.stock,
+        producto.precio
+        )
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        conn.close()
+
+    return {
+        "mensaje": "Producto creado correctamente",
+        "producto": producto
+    }
+
+#------------------------------------
+#PUT
+#------------------------------------
+@app.put("/productos/{id_producto}")
+def update_producto(id_producto: int, producto: ProductoCreate):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            UPDATE Productos
+            SET 
+                nombre = ?,
+                descripcion = ?,
+                id_categoria = ?,
+                stock = ?,
+                precio = ?
+            WHERE id_producto = ?
+        """,
+        producto.nombre,
+        producto.descripcion,
+        producto.id_categoria,
+        producto.stock,
+        producto.precio,
+        id_producto
+        )
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        conn.close()
+
+    return {"mensaje": "Producto actualizado correctamente"}
+
+
+#-----------------------------------
+#Delete
+#-----------------------------------
+@app.delete("/productos/{id_producto}")
+def delete_producto(id_producto: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+            DELETE FROM Productos
+            WHERE id_producto = ?
+        """, id_producto)
+
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+
+        conn.commit()
+
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+    finally:
+        conn.close()
+
+    return {"mensaje": "Producto eliminado correctamente"}
+
+
+
+
 
 # -----------------------------------
 # GET: Productos con nombre categoría
